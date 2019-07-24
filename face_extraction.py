@@ -82,54 +82,6 @@ if __name__ == '__main__':
     print(te_X.shape, te_y.shape)
     savez_compressed('5-celebrity-faces-dataset.npz', tr_X, tr_y, te_X, te_y)
 
-    data = load('5-celebrity-faces-dataset.npz')
-    train_X, train_y, test_X, test_y = data['arr_0'], data['arr_1'], data['arr_2'], data['arr_3']
-    print('Loaded: ', train_X.shape, train_y.shape, test_X.shape, test_y.shape)
-    model = load_model('facenet_keras.h5')
-    print('Loaded Model')
-    newTrainX = list()
-    for face_pixels in train_X:
-        embedding = get_embedding(model, face_pixels)
-        newTrainX.append(embedding)
-    newTrainX = asarray(newTrainX)
-    print(newTrainX.shape)
-    # convert each face in the test set to an embedding
-    newTestX = list()
-    for face_pixels in test_X:
-        embedding = get_embedding(model, face_pixels)
-        newTestX.append(embedding)
-    newTestX = asarray(newTestX)
-    print(newTestX.shape)
-    # save arrays to one file in compressed format
-    savez_compressed('5-celebrity-faces-embeddings.npz', newTrainX, train_y, newTestX, test_y)
-
-    data = load('5-celebrity-faces-embeddings.npz')
-    trainX, trainy, testX, testy = data['arr_0'], data['arr_1'], data['arr_2'], data['arr_3']
-    print('Dataset: train=%d, test=%d' % (trainX.shape[0], testX.shape[0]))
-
-    # normalize input vectors
-    in_encoder = Normalizer(norm='l2')
-    trainX = in_encoder.transform(trainX)
-    testX = in_encoder.transform(testX)
-
-    # label encode targets
-    out_encoder = LabelEncoder()
-    out_encoder.fit(trainy)
-    trainy = out_encoder.transform(trainy)
-    testy = out_encoder.transform(testy)
-
-    # fit model
-    model = SVC(kernel='linear')
-    model.fit(trainX, trainy)
-
-    # predict
-    yhat_train = model.predict(trainX)
-    yhat_test = model.predict(testX)
-    # score
-    score_train = accuracy_score(trainy, yhat_train)
-    score_test = accuracy_score(testy, yhat_test)
-    # summarize
-    print('Accuracy: train=%.3f, test=%.3f' % (score_train * 100, score_test * 100))
 
     # folder = '5-celebrity-faces-dataset/train/ben_afflek/'
     # if not os.path.exists(folder):
